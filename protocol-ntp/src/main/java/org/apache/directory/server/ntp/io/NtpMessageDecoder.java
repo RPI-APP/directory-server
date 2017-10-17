@@ -30,6 +30,8 @@ import org.apache.directory.server.ntp.messages.NtpMessageModifier;
 import org.apache.directory.server.ntp.messages.NtpTimeStamp;
 import org.apache.directory.server.ntp.messages.ReferenceIdentifier;
 import org.apache.directory.server.ntp.messages.StratumType;
+import org.apache.directory.server.ntp.time.SystemTimeSource;
+import org.apache.directory.server.ntp.time.ServerTimeSource;
 
 
 /**
@@ -42,8 +44,22 @@ public class NtpMessageDecoder
      *
      * @param request
      * @return The {@link NtpMessage}.
+     * @deprecated Use the other overload, providing an explicit {@link ServerTimeSource}.
+     * {@link SystemTimeSource} is equivalent to the old behavior. 
      */
     public NtpMessage decode( ByteBuffer request )
+    {
+        return decode( request, new SystemTimeSource() );
+    }
+    
+    /**
+     * Decodes the {@link ByteBuffer} into an {@link NtpMessage}.
+     *
+     * @param request
+     * @param timeSource
+     * @return The {@link NtpMessage}.
+     */
+    public NtpMessage decode( ByteBuffer request, ServerTimeSource timeSource )
     {
         NtpMessageModifier modifier = new NtpMessageModifier();
 
@@ -63,7 +79,7 @@ public class NtpMessageDecoder
         byte[] unneededBytes = new byte[8];
         request.get( unneededBytes );
 
-        modifier.setReceiveTimestamp( new NtpTimeStamp() );
+        modifier.setReceiveTimestamp( new NtpTimeStamp( timeSource ) );
         modifier.setTransmitTimestamp( new NtpTimeStamp( request ) );
 
         return modifier.getNtpMessage();

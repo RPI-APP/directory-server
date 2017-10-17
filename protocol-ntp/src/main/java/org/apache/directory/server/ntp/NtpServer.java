@@ -24,6 +24,8 @@ import java.io.IOException;
 
 import org.apache.directory.server.ntp.protocol.NtpProtocolCodecFactory;
 import org.apache.directory.server.ntp.protocol.NtpProtocolHandler;
+import org.apache.directory.server.ntp.time.SystemTimeSource;
+import org.apache.directory.server.ntp.time.ServerTimeSource;
 import org.apache.directory.server.protocol.shared.AbstractProtocolService;
 import org.apache.directory.server.protocol.shared.transport.Transport;
 import org.apache.directory.server.protocol.shared.transport.UdpTransport;
@@ -59,16 +61,32 @@ public class NtpServer extends AbstractProtocolService
     /** The default service name. */
     private static final String SERVICE_NAME_DEFAULT = "ApacheDS NTP Service";
 
+    /** The source of the current time */
+    private ServerTimeSource timeSource;
+    
+    private NtpProtocolCodecFactory protocolCodecFactory;
 
     /**
-     * Creates a new instance of NtpConfiguration.
+     * Creates a new instance of NtpServer, using the system time as a base.
      */
     public NtpServer()
     {
+        this( new SystemTimeSource() );
+    }
+    
+    /**
+     * Creates a new instance of NtpServer.
+     * 
+     * @param timeSource The source of the current time
+     */
+    public NtpServer( ServerTimeSource timeSource )
+    {
+        this.timeSource = timeSource;
+        this.protocolCodecFactory = new NtpProtocolCodecFactory( timeSource );
+        
         super.setServiceId( SERVICE_PID_DEFAULT );
         super.setServiceName( SERVICE_NAME_DEFAULT );
     }
-
 
     /**
      * Start the NTPServer. We initialize the Datagram and Socket, if necessary.
@@ -79,11 +97,11 @@ public class NtpServer extends AbstractProtocolService
      */
     public void start() throws IOException
     {
-        IoHandler ntpProtocolHandler = new NtpProtocolHandler();
+        IoHandler ntpProtocolHandler = new NtpProtocolHandler( timeSource );
 
         // Create the chain for the NTP server
         DefaultIoFilterChainBuilder ntpChain = new DefaultIoFilterChainBuilder();
-        ntpChain.addLast( "codec", new ProtocolCodecFilter( NtpProtocolCodecFactory.getInstance() ) );
+        ntpChain.addLast( "codec", new ProtocolCodecFilter( protocolCodecFactory ) );
 
         if ( ( transports == null ) || ( transports.size() == 0 ) )
         {

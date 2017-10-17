@@ -26,6 +26,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.directory.server.ntp.time.ServerTimeSource;
+
 
 /**
  * NTP timestamps are represented as a 64-bit unsigned fixed-point number,
@@ -55,15 +57,15 @@ public class NtpTimeStamp
     private long seconds = 0;
     private long fraction = 0;
 
-
     /**
      * Creates a new instance of NtpTimeStamp that represents the time "right now."
+     * 
+     * @param timeSource The source of the current time
      */
-    public NtpTimeStamp()
+    public NtpTimeStamp( ServerTimeSource timeSource )
     {
-        this( new Date() );
+        this( new Date( timeSource.currentTimeMillis() ) );
     }
-
 
     /**
      * Creates a new instance of NtpTimeStamp that represents the given {@link Date}.

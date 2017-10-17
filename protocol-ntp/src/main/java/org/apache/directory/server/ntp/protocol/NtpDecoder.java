@@ -22,6 +22,8 @@ package org.apache.directory.server.ntp.protocol;
 
 
 import org.apache.directory.server.ntp.io.NtpMessageDecoder;
+import org.apache.directory.server.ntp.time.SystemTimeSource;
+import org.apache.directory.server.ntp.time.ServerTimeSource;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderAdapter;
@@ -33,9 +35,25 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
  */
 public class NtpDecoder extends ProtocolDecoderAdapter
 {
+    private ServerTimeSource timeSource;
+    
+    /**
+     * @deprecated Use the other constructor, providing an explicit {@link ServerTimeSource}.
+     * {@link SystemTimeSource} is equivalent to the old behavior. 
+     */
+    public NtpDecoder()
+    {
+        this.timeSource = new SystemTimeSource();
+    }
+    
+    public NtpDecoder( ServerTimeSource timeSource )
+    {
+        this.timeSource = timeSource;
+    }
+    
     public void decode( IoSession session, IoBuffer in, ProtocolDecoderOutput out )
     {
         NtpMessageDecoder decoder = new NtpMessageDecoder();
-        out.write( decoder.decode( in.buf() ) );
+        out.write( decoder.decode( in.buf(), timeSource ) );
     }
 }

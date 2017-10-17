@@ -20,7 +20,6 @@
 
 package org.apache.directory.server.ntp.service;
 
-
 import org.apache.directory.server.ntp.NtpService;
 import org.apache.directory.server.ntp.messages.LeapIndicatorType;
 import org.apache.directory.server.ntp.messages.ModeType;
@@ -29,6 +28,8 @@ import org.apache.directory.server.ntp.messages.NtpMessageModifier;
 import org.apache.directory.server.ntp.messages.NtpTimeStamp;
 import org.apache.directory.server.ntp.messages.ReferenceIdentifier;
 import org.apache.directory.server.ntp.messages.StratumType;
+import org.apache.directory.server.ntp.time.SystemTimeSource;
+import org.apache.directory.server.ntp.time.ServerTimeSource;
 
 
 /**
@@ -36,6 +37,22 @@ import org.apache.directory.server.ntp.messages.StratumType;
  */
 public class NtpServiceImpl implements NtpService
 {
+    private ServerTimeSource timeSource;
+    
+    public NtpServiceImpl( ServerTimeSource timeSource )
+    {
+        this.timeSource = timeSource;
+    }
+    
+    /**
+     * @deprecated Use the other constructor, providing an explicit {@link ServerTimeSource}.
+     * {@link SystemTimeSource} is equivalent to the old behavior.
+     */
+    public NtpServiceImpl()
+    {
+        this( new SystemTimeSource() );
+    }
+    
     public NtpMessage getReplyFor( NtpMessage request )
     {
         NtpMessageModifier modifier = new NtpMessageModifier();
@@ -50,7 +67,7 @@ public class NtpServiceImpl implements NtpService
         modifier.setRootDispersion( 0 );
         modifier.setReferenceIdentifier( ReferenceIdentifier.LOCL );
 
-        NtpTimeStamp now = new NtpTimeStamp();
+        NtpTimeStamp now = new NtpTimeStamp( timeSource );
 
         modifier.setReferenceTimestamp( now );
         modifier.setOriginateTimestamp( request.getTransmitTimestamp() );

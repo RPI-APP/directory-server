@@ -24,6 +24,8 @@ package org.apache.directory.server.ntp.protocol;
 import org.apache.directory.server.ntp.NtpService;
 import org.apache.directory.server.ntp.messages.NtpMessage;
 import org.apache.directory.server.ntp.service.NtpServiceImpl;
+import org.apache.directory.server.ntp.time.SystemTimeSource;
+import org.apache.directory.server.ntp.time.ServerTimeSource;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
@@ -43,9 +45,22 @@ public class NtpProtocolHandler extends IoHandlerAdapter
     private static final Logger LOG = LoggerFactory.getLogger( NtpProtocolHandler.class );
 
     /** The NtpService instance */
-    private NtpService ntpService = new NtpServiceImpl();
+    private NtpService ntpService;
 
-
+    public NtpProtocolHandler( ServerTimeSource timeSource )
+    {
+        ntpService = new NtpServiceImpl( timeSource );
+    }
+    
+    /**
+     * @deprecated Use the other constructor, providing an explicit {@link ServerTimeSource}.
+     * {@link SystemTimeSource} is equivalent to the old behavior. 
+     */
+    public NtpProtocolHandler()
+    {
+        this( new SystemTimeSource() );
+    }
+    
     /**
      * {@inheritDoc}
      */

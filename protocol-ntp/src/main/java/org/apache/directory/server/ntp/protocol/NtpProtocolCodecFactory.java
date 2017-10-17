@@ -21,6 +21,8 @@
 package org.apache.directory.server.ntp.protocol;
 
 
+import org.apache.directory.server.ntp.time.SystemTimeSource;
+import org.apache.directory.server.ntp.time.ServerTimeSource;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
@@ -33,35 +35,41 @@ import org.apache.mina.filter.codec.ProtocolEncoder;
 public final class NtpProtocolCodecFactory implements ProtocolCodecFactory
 {
     private static final NtpProtocolCodecFactory INSTANCE = new NtpProtocolCodecFactory();
-
-
-    /**
-     * Returns the singleton instance of {@link NtpProtocolCodecFactory}.
-     *
-     * @return The singleton instance of {@link NtpProtocolCodecFactory}.
-     */
-    public static NtpProtocolCodecFactory getInstance()
+    
+    private ServerTimeSource timeSource;
+    
+    public NtpProtocolCodecFactory( ServerTimeSource timeSource )
     {
-        return INSTANCE;
+        this.timeSource = timeSource;
     }
-
-
+    
     private NtpProtocolCodecFactory()
     {
-        // Private constructor prevents instantiation outside this class.
+        this.timeSource = new SystemTimeSource();
     }
-
-
+    
     public ProtocolEncoder getEncoder( IoSession session )
     {
         // Create a new encoder.
         return new NtpEncoder();
     }
-
-
+    
     public ProtocolDecoder getDecoder( IoSession session )
     {
         // Create a new decoder.
-        return new NtpDecoder();
+        return new NtpDecoder( timeSource );
+    }
+    
+    /**
+     * Returns the singleton instance of {@link NtpProtocolCodecFactory}.
+     *
+     * @return The singleton instance of {@link NtpProtocolCodecFactory}.
+     * 
+     * @deprecated Construct a {@link NtpProtocolCodecFactory} instead, providing
+     * an explicit {@link ServerTimeSource}. 
+     */
+    public static synchronized NtpProtocolCodecFactory getInstance()
+    {
+        return INSTANCE;
     }
 }

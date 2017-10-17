@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.directory.server.ntp.io.NtpMessageDecoder;
 import org.apache.directory.server.ntp.messages.NtpMessage;
+import org.apache.directory.server.ntp.time.SystemTimeSource;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class NtpMessageDecoderTest
     {
         ByteBuffer buffer = ByteBuffer.wrap( clientRequest );
         NtpMessageDecoder decoder = new NtpMessageDecoder();
-        NtpMessage request = decoder.decode( buffer );
+        NtpMessage request = decoder.decode( buffer, new SystemTimeSource() );
         print( request );
     }
 
@@ -81,7 +82,7 @@ public class NtpMessageDecoderTest
     {
         ByteBuffer buffer = ByteBuffer.wrap( serverResponse );
         NtpMessageDecoder decoder = new NtpMessageDecoder();
-        NtpMessage request = decoder.decode( buffer );
+        NtpMessage request = decoder.decode( buffer, new SystemTimeSource() );
         print( request );
     }
 

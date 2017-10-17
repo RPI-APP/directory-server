@@ -31,6 +31,7 @@ import org.apache.directory.server.ntp.messages.NtpMessageModifier;
 import org.apache.directory.server.ntp.messages.NtpTimeStamp;
 import org.apache.directory.server.ntp.messages.ReferenceIdentifier;
 import org.apache.directory.server.ntp.messages.StratumType;
+import org.apache.directory.server.ntp.time.SystemTimeSource;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +65,7 @@ public class NtpMessageEncoderTest
         modifier.setRootDispersion( 0 );
         modifier.setReferenceIdentifier( ReferenceIdentifier.LOCL );
 
-        NtpTimeStamp now = new NtpTimeStamp();
+        NtpTimeStamp now = new NtpTimeStamp( new SystemTimeSource() );
 
         modifier.setReferenceTimestamp( now );
         modifier.setOriginateTimestamp( now );
@@ -81,7 +82,7 @@ public class NtpMessageEncoderTest
         print( message );
 
         NtpMessageDecoder decoder = new NtpMessageDecoder();
-        NtpMessage reply = decoder.decode( replyByteBuffer );
+        NtpMessage reply = decoder.decode( replyByteBuffer, new SystemTimeSource() );
 
         print( reply );
     }

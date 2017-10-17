@@ -25,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.Date;
 
+import org.apache.directory.server.ntp.time.SystemTimeSource;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,7 +50,7 @@ public class NtpTimeStampTest
     @Before
     public void initNames() throws Exception
     {
-        ntpTimeStampA = new NtpTimeStamp();
+        ntpTimeStampA = new NtpTimeStamp( new SystemTimeSource() );
         Date date = new Date( 1L );
         ntpTimeStampA1 = new NtpTimeStamp( date );
         ntpTimeStampACopy1 = new NtpTimeStamp( date );
